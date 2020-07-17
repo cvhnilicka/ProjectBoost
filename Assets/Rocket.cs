@@ -7,7 +7,13 @@ public class Rocket : MonoBehaviour
     // variables n stuff
     Rigidbody rigidbody;
     AudioSource audioSource;
-    const float rcsThrust = 100f;
+
+    [SerializeField]
+    float rcsThrust = 150f;
+
+    [SerializeField]
+    float boosterThrust = 1000f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -18,26 +24,29 @@ public class Rocket : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        ProcessInput();
+        Rotate();
+        Thrust();
     }
-    // Process input
-    private void ProcessInput()
+
+    void OnCollisionEnter(Collision collision)
     {
-        if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W))
+        switch (collision.gameObject.tag)
         {
-            // space key is down
-            rigidbody.AddRelativeForce(Vector3.up * 10f);
-
-            // only start playing if it isnt already
-            if (!audioSource.isPlaying)
-                audioSource.Play();
+            case "Friendly": // do nothing
+                break;
+            default: print("EXPLOSION!!!!");
+                break;
         }
+    }
 
-        if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.Space))
-        {
-            // stop when no longer thrusting
-            audioSource.Stop();
-        }
+
+    // Process input
+    private void Rotate()
+    {
+
+        // need to prevent unwanted spinning
+        rigidbody.freezeRotation = true; // take manuel control of rotation (from physics system)
+
 
         if (Input.GetKey(KeyCode.A))
         {
@@ -48,6 +57,27 @@ public class Rocket : MonoBehaviour
         {
             // rotate right
             transform.Rotate(Vector3.forward * -rcsThrust * Time.deltaTime);
+        }
+
+        rigidbody.freezeRotation = false; // resume physics control of body
+    }
+
+    private void Thrust()
+    {
+        if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W))
+        {
+            // space key is down
+            rigidbody.AddRelativeForce(Vector3.up * boosterThrust * Time.deltaTime);
+
+            // only start playing if it isnt already
+            if (!audioSource.isPlaying)
+                audioSource.Play();
+        }
+
+        if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.Space))
+        {
+            // stop when no longer thrusting
+            audioSource.Stop();
         }
     }
 }
