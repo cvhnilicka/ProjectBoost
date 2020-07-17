@@ -13,6 +13,16 @@ public class Rocket : MonoBehaviour
     [SerializeField]
     float boosterThrust = 1000f;
 
+    [SerializeField] AudioClip mainEngine;
+
+    [SerializeField] AudioClip deathSound;
+
+    [SerializeField] AudioClip successSound;
+
+    [SerializeField] ParticleSystem engineParticles;
+    [SerializeField] ParticleSystem successParticles;
+    [SerializeField] ParticleSystem deathParticles;
+
     enum State {  Alive, Dying, Transcending }
 
     State state = State.Alive;
@@ -29,8 +39,8 @@ public class Rocket : MonoBehaviour
     {
         if (state == State.Alive)
         {
-            Rotate();
-            Thrust();
+            RespondToRotateInput();
+            RespondToThrustInput();
         }
 
     }
@@ -45,13 +55,9 @@ public class Rocket : MonoBehaviour
             case "Friendly": // do nothing
                 break;
                 
-            case "Finish": print("Hit Finish");
-                state = State.Transcending;
-                Invoke("LoadNextLevel", 1f); // parameterize next time
+            case "Finish": Success();
                 break;
-            default: print("EXPLOSION!!!!");
-                state = State.Dying;
-                Invoke("LoadFirstLevel", 1f);
+            default: Die();
                 break;
         }
     }
@@ -66,15 +72,31 @@ public class Rocket : MonoBehaviour
         SceneManager.LoadScene(0);
     }
 
+    private void Success()
+    {
+        state = State.Transcending;
+        audioSource.Stop();
+        successParticles.Play();
+        audioSource.PlayOneShot(successSound);
+        Invoke("LoadNextLevel", 1f); // parameterize next time
+    }
+
+    private void Die()
+    {
+        state = State.Dying;
+        audioSource.Stop();
+        engineParticles.Stop();
+        deathParticles.Play();
+        audioSource.PlayOneShot(deathSound);
+        Invoke("LoadFirstLevel", 1f);
+    }
+
 
     // Process input
-    private void Rotate()
+    private void RespondToRotateInput()
     {
-
         // need to prevent unwanted spinning
         rigidbody.freezeRotation = true; // take manuel control of rotation (from physics system)
-
-
         if (Input.GetKey(KeyCode.A))
         {
             // rotate left 
@@ -89,22 +111,31 @@ public class Rocket : MonoBehaviour
         rigidbody.freezeRotation = false; // resume physics control of body
     }
 
-    private void Thrust()
+    private void RespondToThrustInput()
     {
         if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W))
         {
             // space key is down
-            rigidbody.AddRelativeForce(Vector3.up * boosterThrust * Time.deltaTime);
-
-            // only start playing if it isnt already
-            if (!audioSource.isPlaying)
-                audioSource.Play();
+            ApplyThrust();
         }
 
         if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.Space))
         {
             // stop when no longer thrusting
             audioSource.Stop();
+            engineParticles.Stop();
         }
+    }
+
+    private void ApplyThrust()
+    {
+        rigidbody.AddRelativeForce(Vector3.up * boosterThrust * Time.deltaTime);
+
+        // only start playing if it isnt already
+        if (!audioSource.isPlaying)
+            audioSource.PlayOneShot(mainEngine);
+
+        if (!engineParticles.isPlaying)
+            engineParticles.Play();
     }
 }
