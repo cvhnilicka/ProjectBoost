@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Rocket : MonoBehaviour
 {
@@ -14,6 +13,10 @@ public class Rocket : MonoBehaviour
     [SerializeField]
     float boosterThrust = 1000f;
 
+    enum State {  Alive, Dying, Transcending }
+
+    State state = State.Alive;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -24,19 +27,43 @@ public class Rocket : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Rotate();
-        Thrust();
+        if (state == State.Alive)
+        {
+            Rotate();
+            Thrust();
+        }
+
     }
 
     void OnCollisionEnter(Collision collision)
     {
+        if (state != State.Alive) return;
+
+
         switch (collision.gameObject.tag)
         {
             case "Friendly": // do nothing
                 break;
+                
+            case "Finish": print("Hit Finish");
+                state = State.Transcending;
+                Invoke("LoadNextLevel", 1f); // parameterize next time
+                break;
             default: print("EXPLOSION!!!!");
+                state = State.Dying;
+                Invoke("LoadFirstLevel", 1f);
                 break;
         }
+    }
+
+    private void LoadNextLevel()
+    {
+        SceneManager.LoadScene(1);
+    }
+
+    private void LoadFirstLevel()
+    {
+        SceneManager.LoadScene(0);
     }
 
 

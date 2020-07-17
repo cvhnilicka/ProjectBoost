@@ -11,21 +11,26 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: da800ea8979f41e44a4a983dce08486d, type: 2}
+      objectReference: {fileID: 2100000, guid: 94cd3f4cad1d218478628fb908fc3ec4, type: 2}
     - target: {fileID: 2055781551664160704, guid: 407b47242ea765c44944baad9f0e690b,
         type: 3}
       propertyPath: m_Name
       value: Landing Pad
       objectReference: {fileID: 0}
+    - target: {fileID: 2055781551664160704, guid: 407b47242ea765c44944baad9f0e690b,
+        type: 3}
+      propertyPath: m_TagString
+      value: Finish
+      objectReference: {fileID: 0}
     - target: {fileID: 8436917512729236438, guid: 407b47242ea765c44944baad9f0e690b,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 17.8
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 8436917512729236438, guid: 407b47242ea765c44944baad9f0e690b,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.89
+      value: 13.89
       objectReference: {fileID: 0}
     - target: {fileID: 8436917512729236438, guid: 407b47242ea765c44944baad9f0e690b,
         type: 3}
