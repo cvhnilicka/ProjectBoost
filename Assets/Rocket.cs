@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Rocket : MonoBehaviour
@@ -22,6 +23,10 @@ public class Rocket : MonoBehaviour
     [SerializeField] ParticleSystem successParticles;
     [SerializeField] ParticleSystem deathParticles;
 
+    private int numLevels;
+    private int currLevel = 0;
+    bool collisionsOn = true;
+
     enum State {  Alive, Dying, Transcending }
 
     State state = State.Alive;
@@ -31,6 +36,8 @@ public class Rocket : MonoBehaviour
     {
         rigidbody = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
+        numLevels = SceneManager.sceneCountInBuildSettings;
+        // print(numLevels);
     }
 
     // Update is called once per frame
@@ -41,12 +48,29 @@ public class Rocket : MonoBehaviour
             RespondToRotateInput();
             RespondToThrustInput();
         }
+        if (Debug.isDebugBuild)
+            RespondToDebugKeys();
 
+    }
+
+    private void RespondToDebugKeys()
+    {
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            LoadNextLevel();
+        }
+
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            // toggle collisions
+            collisionsOn = !collisionsOn;
+
+        }
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        if (state != State.Alive) return;
+        if (state != State.Alive || !collisionsOn) return;
 
 
         switch (collision.gameObject.tag)
@@ -63,7 +87,13 @@ public class Rocket : MonoBehaviour
 
     private void LoadNextLevel()
     {
-        SceneManager.LoadScene(1);
+        int nextIndex = SceneManager.GetActiveScene().buildIndex + 1;
+        if ( nextIndex >= numLevels)
+        {
+            nextIndex = 0;
+        }
+        SceneManager.LoadScene(nextIndex);
+
     }
 
     private void LoadFirstLevel()
@@ -73,6 +103,8 @@ public class Rocket : MonoBehaviour
 
     private void Success()
     {
+        print("currLevel: " + currLevel);
+        print("numLevels: " + numLevels);
         state = State.Transcending;
         audioSource.Stop();
         successParticles.Play();
@@ -89,6 +121,8 @@ public class Rocket : MonoBehaviour
         audioSource.PlayOneShot(deathSound);
         Invoke("LoadFirstLevel", levelLoadDelay);
     }
+
+
 
 
     // Process input
